@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       1000ants Connector
  * Description:       Lets 1000ants apply prepared fixes directly on your site. Nothing changes without your approval in 1000ants first, and every change is recorded and can be undone.
- * Version:           1.2.1
+ * Version:           1.2.2
  * Requires at least: 6.2
  * Requires PHP:      7.4
  * Author:            1000ants
@@ -28,14 +28,15 @@
  *      the undo.
  *
  * It sends nothing anywhere, loads nothing on the front end but the two hooks
- * above, and stores two options that uninstall.php removes.
+ * above, and stores two options and the undo of a schema change, which
+ * uninstall.php removes.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'THANTS_CONNECTOR_VERSION', '1.2.1' );
+define( 'THANTS_CONNECTOR_VERSION', '1.2.2' );
 define( 'THANTS_REST_NAMESPACE', '1000ants/v1' );
 define( 'THANTS_REDIRECTS_OPTION', 'thants_connector_redirects' );
 define( 'THANTS_ROBOTS_OPTION', 'thants_connector_robots_lines' );

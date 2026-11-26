@@ -10,7 +10,7 @@
  *   PUT    /robots            {lines}; answers the previous lines  (manage_options)
  *   GET    /schema/<id>       the page's schema type and state     (edit_post)
  *   POST   /schema/<id>       {type, if_fingerprint}               (edit_post)
- *   POST   /schema/<id>/restore {if_fingerprint} — the undo of the last set (edit_post)
+ *   POST   /schema/<id>/restore {if_fingerprint, before} — the undo of that set (edit_post)
  *   GET    /schema-default/<type>   a post type's default schema       (manage_options)
  *   POST   /schema-default/<type>   {type, if_fingerprint}             (manage_options)
  *   POST   /schema-default/<type>/restore {values, if_fingerprint}     (manage_options)
@@ -136,6 +136,7 @@ function thants_register_schema_routes() {
 			'permission_callback' => 'thants_can_edit_schema',
 			'args'                => array(
 				'if_fingerprint' => array( 'type' => 'string', 'required' => true ),
+				'before'         => array( 'type' => 'string', 'required' => true ),
 			),
 		)
 	);
@@ -230,7 +231,7 @@ function thants_rest_restore_schema( WP_REST_Request $request ) {
 	if ( ! thants_schema_supported() ) {
 		return thants_schema_unsupported();
 	}
-	$view = thants_restore_schema( (int) $request['id'], (string) $request['if_fingerprint'] );
+	$view = thants_restore_schema( (int) $request['id'], (string) $request['if_fingerprint'], (string) $request['before'] );
 	return is_wp_error( $view ) ? $view : rest_ensure_response( $view );
 }
 

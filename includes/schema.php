@@ -40,7 +40,8 @@ function thants_schema_rows( $post_id ) {
 			continue;
 		}
 		foreach ( (array) $values as $value ) {
-			$rows[] = array( (string) $key, maybe_unserialize( $value ) );
+			$v      = maybe_unserialize( $value );
+		$rows[] = array( (string) $key, is_array( $v ) ? $v : array() );
 		}
 	}
 	return $rows;
@@ -164,7 +165,7 @@ function thants_set_schema( $post_id, $type, $if_fingerprint ) {
 	}
 	$keep = array();
 	foreach ( $state['rows'] as $row ) {
-		if ( empty( $row[1]['metadata']['isPrimary'] ) ) {
+		if ( ! is_array( $row[1] ) || empty( $row[1]['metadata']['isPrimary'] ) ) {
 			$keep[] = $row;
 		}
 	}
@@ -178,17 +179,26 @@ function thants_set_schema( $post_id, $type, $if_fingerprint ) {
 	}
 	$view = thants_schema_view( $post_id );
 	// What the undo puts back, kept with the fingerprint it may be undone from.
-	update_post_meta( $post_id, THANTS_SCHEMA_UNDO, wp_slash( array( 'after' => $view['fingerprint'], 'state' => $state ) ) );
+	// The before-fingerprint names WHICH change this is: two "none" sets
+	// leave the same after-state, so `after` alone could restore the wrong
+	// "before" (senior review 2026-11-22).
+	update_post_meta( $post_id, THANTS_SCHEMA_UNDO, wp_slash( array(
+		'before' => $if_fingerprint,
+		'after'  => $view['fingerprint'],
+		'state'  => $state,
+	) ) );
 	return $view;
 }
 
 /**
  * The undo: the state kept when the last change was made, row for row —
- * only while the post still holds exactly what that change left.
+ * only for THAT change (its before-fingerprint), and only while the post
+ * still holds exactly what it left.
  */
-function thants_restore_schema( $post_id, $if_fingerprint ) {
+function thants_restore_schema( $post_id, $if_fingerprint, $before ) {
 	$undo = get_post_meta( $post_id, THANTS_SCHEMA_UNDO, true );
-	if ( ! is_array( $undo ) || empty( $undo['after'] ) || ! isset( $undo['state'] ) || ! is_array( $undo['state'] ) ) {
+	if ( ! is_array( $undo ) || empty( $undo['after'] ) || ! isset( $undo['state'] ) || ! is_array( $undo['state'] )
+		|| ! isset( $undo['before'] ) || $undo['before'] !== $before ) {
 		return new WP_Error( 'thants_no_undo', 'nothing to undo', array( 'status' => 409 ) );
 	}
 	$now = thants_schema_fingerprint( thants_schema_state( $post_id ) );

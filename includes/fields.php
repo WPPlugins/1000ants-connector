@@ -64,7 +64,8 @@ function thants_post_types() {
  * update_metadata). So it changes nothing the SEO plugin would keep: no
  * sanitize_text_field, which strips "%da" out of Rank Math's %date% and
  * Yoast's %%date%%. Control characters go (tab and newline stay), and tags
- * go for a user without `unfiltered_html`.
+ * go for a user without `unfiltered_html` — on the SEO plugin's own saves
+ * too, which is the point: they print the value into the head.
  */
 function thants_sanitize_field( $value, $meta_key ) {
 	if ( is_array( $value ) ) {
@@ -77,8 +78,15 @@ function thants_sanitize_field( $value, $meta_key ) {
 	$value = (string) preg_replace( '/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $value );
 	// No markup from someone WordPress does not trust with HTML (an author,
 	// a contributor): the SEO plugin prints these values into the page head.
-	// wp_strip_all_tags leaves %-variables alone.
-	return current_user_can( 'unfiltered_html' ) ? $value : wp_strip_all_tags( $value );
+	// Only real tags go — "Save <50% today" stays whole, which strip_tags
+	// would cut after "<" — and %-variables are left alone.
+	return current_user_can( 'unfiltered_html' ) ? $value : thants_strip_markup( $value );
+}
+
+function thants_strip_markup( $value ) {
+	$value = (string) preg_replace( '@<(script|style)\b[^>]*>.*?</\1\s*>@is', '', (string) $value );
+	$value = (string) preg_replace( '@<!--.*?-->@s', '', $value );
+	return (string) preg_replace( '@</?[a-z][a-z0-9-]*(\s[^<>]*)?/?>@i', '', $value );
 }
 
 function thants_register_seo_fields() {

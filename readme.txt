@@ -2,9 +2,9 @@
 Contributors: 1000ants
 Tags: seo, redirects, robots.txt, site audit, automation
 Requires at least: 6.2
-Tested up to: 7.1
+Tested up to: 7.2
 Requires PHP: 7.4
-Stable tag: 1.2.1
+Stable tag: 1.2.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -51,13 +51,17 @@ For SEO titles and descriptions, Rank Math or Yoast SEO. Redirects and robots.tx
 
 = What happens when I remove the plugin? =
 
-Its redirects and robots.txt rules are deleted. Titles and descriptions it helped write stay in your SEO plugin, where they belong.
+Its redirects and robots.txt rules are deleted. Titles, descriptions and schema settings it helped write stay in your SEO plugin, where they belong.
 
 = Does the plugin add anything to my pages? =
 
 No scripts, no styles, no tracking. It only answers the requests 1000ants makes with your permission.
 
 == Changelog ==
+
+= 1.2.2 =
+* Undoing a schema change takes back exactly that change, never another one made on the same page.
+* Removing markup from SEO titles keeps text such as "<50%" intact.
 
 = 1.2.1 =
 * The undo of a schema change restores what the plugin kept itself, never data sent with the request.
